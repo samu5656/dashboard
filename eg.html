@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>My Desk — Productivity Workspace</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#fff; --muted:#666; --accent:#ffca28;
+  }
+  body{ margin:0; font-family:Inter,system-ui,Arial; background:var(--bg); color:#111; }
+  .navbar{
+    height:56px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 16px; background:#222; color:#fff; position:sticky; top:0; z-index:50;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700}
+  .logo img{width:34px;height:34px;border-radius:6px}
+  .nav-actions{display:flex;align-items:center;gap:10px}
+  .icon-btn{background:transparent;border:none;color:inherit;cursor:pointer;font-size:18px;padding:6px;border-radius:6px}
+  .theme-toggle{background:#fff;color:#000;padding:6px 10px;border-radius:20px;cursor:pointer;border:none}
+
+  /* Dashboard grid */
+  .dashboard{
+    display:flex; gap:14px; padding:18px; flex-wrap:wrap;
+    align-content:flex-start;
+  }
+
+  /* Widget card */
+  .widget{
+    width:260px; min-width:220px; background:var(--card); border-radius:10px;
+    box-shadow:0 6px 18px rgba(16,24,40,0.06); display:flex; flex-direction:column;
+    overflow:hidden; border:1px solid rgba(0,0,0,0.04);
+  }
+  .widget.dragging{opacity:0.4}
+  .widget-header{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:8px 10px; cursor:grab; user-select:none; background:linear-gradient(90deg,var(--accent),#ffd76b);
+  }
+  .widget-title{font-weight:600; font-size:15px}
+  .widget-controls{display:flex;gap:6px; align-items:center}
+  .widget-controls button{background:transparent;border:none;cursor:pointer;padding:6px;border-radius:6px}
+  .widget-body{padding:10px; min-height:90px; overflow:auto}
+
+  /* Sticky note item */
+  .note-item{ background:#fff7b0; padding:8px; border-radius:8px; margin-bottom:8px; position:relative; }
+  .note-item textarea{ width:100%; border:none; background:transparent; resize:vertical; font-family:inherit; font-size:14px; outline:none}
+  .note-delete{ position:absolute; right:6px; top:6px; background:transparent;border:none; cursor:pointer; }
+
+  /* Todo */
+  .todo-list{ list-style:none; padding:0; margin:0; }
+  .todo-list li{ display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px dashed rgba(0,0,0,0.04)}
+  .todo-list li:last-child{ border-bottom:none}
+  .todo-list input[type="text"]{ width:100%; padding:6px; border-radius:6px; border:1px solid rgba(0,0,0,0.06)}
+  .task-complete{ text-decoration:line-through; color:var(--muted) }
+
+  /* Bookmarks */
+  .bookmark-row{ display:flex; gap:8px; margin-bottom:8px; align-items:center }
+  .bookmark-row input{ flex:1; padding:6px; border-radius:6px; border:1px solid rgba(0,0,0,0.06)}
+  .bookmark-list{ list-style:none; padding:0; margin:0 }
+  .bookmark-list li{ display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed rgba(0,0,0,0.04)}
+
+  /* Clock box */
+  .clock-box{ position:fixed; right:18px; bottom:18px; background:var(--card); padding:10px 12px; border-radius:10px; box-shadow:0 8px 18px rgba(16,24,40,0.08); text-align:center; width:140px; z-index:60}
+  .clock-time{ font-size:18px; font-weight:700 }
+  .clock-date{ font-size:12px; color:var(--muted); margin-top:4px }
+
+  /* Calendar popup */
+  .overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:80 }
+  .overlay.active{ display:block }
+  .calendar-popup{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:90;
+    background:var(--card); padding:14px; border-radius:10px; width:320px; box-shadow:0 20px 50px rgba(16,24,40,0.2);
+  }
+  .cal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px}
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .cal-day{ padding:8px; text-align:center; border-radius:6px; font-size:13px }
+  .cal-day.today{ background:#ffe9a6; font-weight:700 }
+
+  /* Settings modal */
+  .settings-popup{ position:fixed; right:18px; top:66px; width:280px; background:var(--card); z-index:95; padding:12px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.12) }
+  .hidden{ display:none !important }
+
+  /* Dark mode */
+  .dark { --bg:#0f1720; --card:#0b1220; --muted:#9aa4b2; --accent:#f6b21a; color:#e6eef8 }
+  .dark .navbar{ background:#071023 }
+  .dark .theme-toggle{ background:#111;color:#fff }
+  a { color:#0b67c2; text-decoration:none }
+  a:hover{ text-decoration:underline }
+</style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo"><img src="https://cdn-icons-png.flaticon.com/512/1827/1827504.png" alt="logo"><span>My Desk</span></div>
+    <div class="nav-actions">
+      <button id="settingsBtn" class="icon-btn" title="Settings">⚙️</button>
+      <button id="themeToggle" class="theme-toggle" title="Toggle theme">🌞</button>
+    </div>
+  </div>
+
+  <!-- Dashboard area -->
+  <div id="dashboard" class="dashboard" aria-live="polite">
+    <!-- Widgets will be injected (or you can keep static defaults here) -->
+    <div class="widget" data-id="notes">
+      <div class="widget-header" draggable="true"><div class="widget-title">Sticky Notes</div>
+        <div class="widget-controls">
+          <button class="widget-btn" data-action="add-note" title="Add note">＋</button>
+          <button class="widget-btn" data-action="remove-widget" title="Remove widget">✖</button>
+        </div>
+      </div>
+      <div class="widget-body">
+        <div class="notes-list"></div>
+        <div style="margin-top:8px; display:flex; gap:8px">
+          <input class="new-note-text" placeholder="Quick note..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+          <button class="add-note-btn">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="widget" data-id="todo">
+      <div class="widget-header" draggable="true"><div class="widget-title">To-Do List</div>
+        <div class="widget-controls">
+          <button class="widget-btn" data-action="clear-completed" title="Clear completed">🧹</button>
+          <button class="widget-btn" data-action="remove-widget" title="Remove widget">✖</button>
+        </div>
+      </div>
+      <div class="widget-body">
+        <ul class="todo-list"></ul>
+        <div style="margin-top:8px; display:flex; gap:8px">
+          <input class="new-task-text" placeholder="New task..." />
+          <button class="add-task-btn">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="widget" data-id="bookmarks">
+      <div class="widget-header" draggable="true"><div class="widget-title">Bookmarks</div>
+        <div class="widget-controls">
+          <button class="widget-btn" data-action="remove-widget" title="Remove widget">✖</button>
+        </div>
+      </div>
+      <div class="widget-body">
+        <div class="bookmark-row">
+          <input class="bookmark-title" placeholder="Title" />
+          <input class="bookmark-url" placeholder="https://..." />
+        </div>
+        <div style="display:flex; gap:8px; margin-top:8px">
+          <button class="add-bookmark-btn">Add</button>
+          <button class="import-sample-bookmarks">Sample</button>
+        </div>
+        <ul class="bookmark-list" style="margin-top:10px"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clock & Calendar trigger -->
+  <div class="clock-box">
+    <div class="clock-time" id="clockTime">--:--</div>
+    <div class="clock-date" id="clockDate">-- --- ----</div>
+    <div style="margin-top:8px; display:flex; gap:8px; justify-content:center">
+      <button id="calendarBtn" class="icon-btn" title="Open calendar">📅</button>
+    </div>
+  </div>
+
+  <!-- Calendar overlay & popup -->
+  <div id="overlay" class="overlay"></div>
+  <div id="calendarPopup" class="calendar-popup hidden" role="dialog" aria-modal="true" aria-labelledby="calTitle">
+    <div class="cal-header">
+      <button id="prevMonth" class="icon-btn">◀</button>
+      <div id="calTitle" style="font-weight:700"></div>
+      <button id="nextMonth" class="icon-btn">▶</button>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; font-size:12px; color:var(--muted)">
+      <div style="text-align:center">Sun</div><div style="text-align:center">Mon</div><div style="text-align:center">Tue</div><div style="text-align:center">Wed</div><div style="text-align:center">Thu</div><div style="text-align:center">Fri</div><div style="text-align:center">Sat</div>
+    </div>
+    <div id="calGrid" class="cal-grid"></div>
+    <div style="margin-top:10px; text-align:right">
+      <button id="closeCal" class="icon-btn">Close</button>
+    </div>
+  </div>
+
+  <!-- Settings popup -->
+  <div id="settingsPopup" class="settings-popup hidden" role="dialog" aria-modal="false">
+    <h4 style="margin:0 0 8px 0">Settings</h4>
+    <div style="display:flex; flex-direction:column; gap:8px">
+      <button id="resetLayoutBtn">Reset layout & clear data</button>
+      <button id="restoreWidgetsBtn">Restore default widgets</button>
+      <label style="font-size:13px;color:var(--muted)"><input type="checkbox" id="autoSaveToggle" checked /> Auto-save content</label>
+      <small style="color:var(--muted)">Layout & content saved to localStorage.</small>
+    </div>
+  </div>
+
+<script>
+/* ---------------------------
+   Persistence helpers
+----------------------------*/
+const STORAGE_KEYS = {
+  ORDER: 'desk_order_v1',
+  CONTENT: 'desk_content_v1',
+  THEME: 'desk_theme_v1',
+};
+
+function saveOrder(){
+  const order = [...dashboard.querySelectorAll('.widget')].map(w=>w.dataset.id);
+  localStorage.setItem(STORAGE_KEYS.ORDER, JSON.stringify(order));
+}
+function loadOrder(){
+  const raw = localStorage.getItem(STORAGE_KEYS.ORDER);
+  if(!raw) return null;
+  try{ return JSON.parse(raw) } catch(e){ return null; }
+}
+
+function saveContent(content){
+  localStorage.setItem(STORAGE_KEYS.CONTENT, JSON.stringify(content));
+}
+function loadContent(){
+  const raw = localStorage.getItem(STORAGE_KEYS.CONTENT);
+  if(!raw) return null;
+  try{ return JSON.parse(raw) } catch(e){ return null; }
+}
+function saveTheme(theme){ localStorage.setItem(STORAGE_KEYS.THEME, theme); }
+function loadTheme(){ return localStorage.getItem(STORAGE_KEYS.THEME) || 'light' }
+
+/* ---------------------------
+   Basic DOM refs
+----------------------------*/
+const dashboard = document.getElementById('dashboard');
+const clockTime = document.getElementById('clockTime');
+const clockDate = document.getElementById('clockDate');
+const calendarBtn = document.getElementById('calendarBtn');
+const overlay = document.getElementById('overlay');
+const calendarPopup = document.getElementById('calendarPopup');
+const calGrid = document.getElementById('calGrid');
+const calTitle = document.getElementById('calTitle');
+const prevMonth = document.getElementById('prevMonth');
+const nextMonth = document.getElementById('nextMonth');
+const closeCal = document.getElementById('closeCal');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsPopup = document.getElementById('settingsPopup');
+const resetLayoutBtn = document.getElementById('resetLayoutBtn');
+const restoreWidgetsBtn = document.getElementById('restoreWidgetsBtn');
+const themeToggle = document.getElementById('themeToggle');
+
+/* ---------------------------
+   Default seed content
+----------------------------*/
+const DEFAULT_CONTENT = {
+  notes: [{id: genId(), text: 'Welcome! This is a sticky note. Edit or add new ones.'}],
+  todo: [{id: genId(), text: 'Finish project plan', done:false},{id: genId(), text: 'Buy groceries', done:false}],
+  bookmarks: [{id:genId(), title:'Google', url:'https://google.com'},{id:genId(), title:'GitHub', url:'https://github.com'}]
+};
+
+/* ---------------------------
+   Utilities
+----------------------------*/
+function genId(){ return 'id_' + Math.random().toString(36).slice(2,9) }
+function qs(sel, root=document) { return root.querySelector(sel) }
+function qsa(sel, root=document) { return [...root.querySelectorAll(sel)] }
+
+/* ---------------------------
+   Renderers for widgets
+----------------------------*/
+let contentState = loadContent() || DEFAULT_CONTENT;
+
+function renderNotes(){
+  const widget = dashboard.querySelector('.widget[data-id="notes"]');
+  const list = widget.querySelector('.notes-list');
+  list.innerHTML = '';
+  contentState.notes.forEach(n=>{
+    const note = document.createElement('div'); note.className='note-item';
+    note.dataset.noteId = n.id;
+    const ta = document.createElement('textarea'); ta.value = n.text;
+    ta.addEventListener('input', () => {
+      n.text = ta.value; maybeSave();
+    });
+    const del = document.createElement('button'); del.className='note-delete'; del.innerText='✖';
+    del.addEventListener('click', ()=>{
+      contentState.notes = contentState.notes.filter(x=>x.id!==n.id);
+      renderNotes(); maybeSave();
+    });
+    note.appendChild(ta); note.appendChild(del);
+    list.appendChild(note);
+  });
+  // attach add
+  widget.querySelector('.add-note-btn').onclick = ()=>{
+    const input = widget.querySelector('.new-note-text');
+    const val = input.value.trim(); if(!val) return;
+    contentState.notes.unshift({id:genId(), text:val});
+    input.value=''; renderNotes(); maybeSave();
+  };
+  // quick-add button on header
+  widget.querySelector('[data-action="add-note"]').onclick = ()=>{
+    contentState.notes.unshift({id:genId(), text:''});
+    renderNotes(); maybeSave();
+  };
+}
+
+function renderTodo(){
+  const widget = dashboard.querySelector('.widget[data-id="todo"]');
+  const list = widget.querySelector('.todo-list'); list.innerHTML='';
+  contentState.todo.forEach(t=>{
+    const li = document.createElement('li');
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = !!t.done;
+    const txt = document.createElement('span'); txt.textContent = t.text; txt.style.flex='1';
+    if(t.done) txt.className='task-complete';
+    cb.addEventListener('change', ()=>{
+      t.done = cb.checked; maybeSave(); renderTodo();
+    });
+    const del = document.createElement('button'); del.innerText='✖'; del.style.border='none'; del.style.background='transparent'; del.style.cursor='pointer';
+    del.addEventListener('click', ()=>{
+      contentState.todo = contentState.todo.filter(x=>x.id!==t.id); maybeSave(); renderTodo();
+    });
+    li.appendChild(cb); li.appendChild(txt); li.appendChild(del);
+    list.appendChild(li);
+  });
+  widget.querySelector('.add-task-btn').onclick = ()=>{
+    const input = widget.querySelector('.new-task-text');
+    const val = input.value.trim(); if(!val) return;
+    contentState.todo.unshift({id:genId(), text:val, done:false});
+    input.value=''; renderTodo(); maybeSave();
+  }
+  widget.querySelector('[data-action="clear-completed"]').onclick = ()=>{
+    contentState.todo = contentState.todo.filter(t=>!t.done); maybeSave(); renderTodo();
+  }
+}
+
+function renderBookmarks(){
+  const widget = dashboard.querySelector('.widget[data-id="bookmarks"]');
+  const list = widget.querySelector('.bookmark-list'); list.innerHTML='';
+  contentState.bookmarks.forEach(b=>{
+    const li = document.createElement('li');
+    const left = document.createElement('div'); left.style.flex='1';
+    const a = document.createElement('a'); a.href=b.url; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent = b.title || b.url;
+    left.appendChild(a);
+    const right = document.createElement('div');
+    const del = document.createElement('button'); del.innerText='✖'; del.style.border='none'; del.style.background='transparent'; del.style.cursor='pointer';
+    del.addEventListener('click', ()=>{ contentState.bookmarks = contentState.bookmarks.filter(x=>x.id!==b.id); maybeSave(); renderBookmarks(); });
+    right.appendChild(del);
+    li.appendChild(left); li.appendChild(right); list.appendChild(li);
+  });
+
+  widget.querySelector('.add-bookmark-btn').onclick = ()=>{
+    const title = widget.querySelector('.bookmark-title').value.trim();
+    const url = widget.querySelector('.bookmark-url').value.trim();
+    if(!url) return alert('Please add a URL');
+    contentState.bookmarks.unshift({id:genId(), title: title || url, url});
+    widget.querySelector('.bookmark-title').value=''; widget.querySelector('.bookmark-url').value=''; renderBookmarks(); maybeSave();
+  };
+  widget.querySelector('.import-sample-bookmarks').onclick = ()=>{
+    contentState.bookmarks = contentState.bookmarks.concat(DEFAULT_CONTENT.bookmarks.map(x=>({id:genId(), ...x})));
+    renderBookmarks(); maybeSave();
+  };
+}
+
+/* ---------------------------
+   Save mechanism
+----------------------------*/
+let autoSave = true;
+function maybeSave(){
+  if(!autoSave) return;
+  saveContent(contentState);
+}
+
+/* ---------------------------
+   Widget order persistence + deletion
+----------------------------*/
+function attachRemoveButtons(){
+  qsa('.widget [data-action="remove-widget"]').forEach(btn=>{
+    btn.onclick = (e)=>{
+      const w = btn.closest('.widget');
+      if(!confirm('Remove this widget from dashboard?')) return;
+      w.remove();
+      saveOrder();
+    };
+  });
+}
+
+/* ---------------------------
+   Drag & Drop (title bar only)
+----------------------------*/
+let dragged = null;
+
+function setupDragAndDrop(){
+  qsa('.widget').forEach(widget=>{
+    const header = widget.querySelector('.widget-header');
+    header.setAttribute('draggable','true');
+
+    header.addEventListener('dragstart', (e)=>{
+      dragged = widget;
+      widget.classList.add('dragging');
+      // some browsers need dataTransfer set
+      try{ e.dataTransfer.setData('text/plain', widget.dataset.id); } catch(e){}
+    });
+
+    header.addEventListener('dragend', ()=>{
+      if(dragged) dragged.classList.remove('dragging');
+      dragged = null;
+      saveOrder();
+    });
+  });
+
+  dashboard.addEventListener('dragover', (e)=>{
+    e.preventDefault();
+    const after = getDragAfterElement(dashboard, e.clientX, e.clientY);
+    if(!dragged) return;
+    if(after == null) dashboard.appendChild(dragged);
+    else dashboard.insertBefore(dragged, after);
+  });
+}
+
+function getDragAfterElement(container, x, y){
+  const draggableElements = [...container.querySelectorAll('.widget:not(.dragging)')];
+  return draggableElements.reduce((closest, child)=>{
+    const box = child.getBoundingClientRect();
+    // choose by Y then X so wrapped rows behave more intuitively
+    const offsetY = y - box.top - box.height/2;
+    const offsetX = x - box.left - box.width/2;
+    const offset = Math.abs(offsetY) < Math.abs(offsetX) ? offsetX : offsetY;
+    if(offset < 0 && offset > closest.offset) return {offset, element:child};
+    return closest;
+  }, {offset: Number.NEGATIVE_INFINITY}).element || null;
+}
+
+/* ---------------------------
+   Calendar (simple month view)
+----------------------------*/
+let calDate = new Date();
+function openCalendar(){
+  overlay.classList.add('active'); calendarPopup.classList.remove('hidden');
+  renderCalendar(calDate.getFullYear(), calDate.getMonth());
+}
+function closeCalendar(){ overlay.classList.remove('active'); calendarPopup.classList.add('hidden'); }
+
+function renderCalendar(year, month){
+  calGrid.innerHTML = '';
+  calTitle.textContent = `${new Date(year, month).toLocaleString(undefined,{month:'long'})} ${year}`;
+  const first = new Date(year, month, 1).getDay();
+  const days = new Date(year, month+1, 0).getDate();
+  // fill blanks
+  for(let i=0;i<first;i++){ const el=document.createElement('div'); el.className='cal-day'; el.innerHTML=''; calGrid.appendChild(el); }
+  const today = new Date();
+  for(let d=1; d<=days; d++){
+    const el = document.createElement('div'); el.className='cal-day'; el.textContent = d;
+    if(year===today.getFullYear() && month===today.getMonth() && d===today.getDate()) el.classList.add('today');
+    calGrid.appendChild(el);
+  }
+}
+
+/* ---------------------------
+   Clock
+----------------------------*/
+function updateClock(){
+  const now = new Date();
+  clockTime.textContent = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  clockDate.textContent = now.toLocaleDateString([], {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+}
+setInterval(updateClock, 1000); updateClock();
+
+/* ---------------------------
+   Settings and theme
+----------------------------*/
+document.getElementById('settingsBtn').addEventListener('click', ()=>{
+  settingsPopup.classList.toggle('hidden');
+});
+resetLayoutBtn.addEventListener('click', ()=>{
+  if(!confirm('This clears all saved data and restores defaults. Continue?')) return;
+  localStorage.removeItem(STORAGE_KEYS.ORDER);
+  localStorage.removeItem(STORAGE_KEYS.CONTENT);
+  localStorage.removeItem(STORAGE_KEYS.THEME);
+  location.reload();
+});
+restoreWidgetsBtn.addEventListener('click', ()=>{
+  contentState = JSON.parse(JSON.stringify(DEFAULT_CONTENT)); maybeSave(); renderAll();
+});
+
+// theme toggle
+function applyTheme(theme){
+  if(theme==='dark'){ document.documentElement.classList.add('dark'); themeToggle.textContent='🌜'; } 
+  else { document.documentElement.classList.remove('dark'); themeToggle.textContent='🌞'; }
+  saveTheme(theme);
+}
+themeToggle.addEventListener('click', ()=>{
+  const current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  const next = current==='dark' ? 'light' : 'dark';
+  applyTheme(next);
+});
+
+/* ---------------------------
+   Init + Restore order/content
+----------------------------*/
+function renderAll(){
+  // If widget order saved, re-arrange
+  const order = loadOrder();
+  if(order){
+    // append in that order
+    order.forEach(id=>{
+      const el = dashboard.querySelector(`.widget[data-id="${id}"]`);
+      if(el) dashboard.appendChild(el);
+    });
+  }
+  // render widget contents
+  renderNotes(); renderTodo(); renderBookmarks();
+  attachRemoveButtons();
+  setupDragAndDrop();
+}
+
+// Load persisted theme
+applyTheme(loadTheme());
+
+// restore saved content if present
+const persisted = loadContent();
+if(persisted) contentState = persisted;
+
+// initialize calendar handlers
+calendarBtn.addEventListener('click', ()=>{ openCalendar(); });
+overlay.addEventListener('click', closeCalendar);
+closeCal.addEventListener('click', closeCalendar);
+prevMonth.addEventListener('click', ()=>{ calDate = new Date(calDate.getFullYear(), calDate.getMonth()-1, 1); renderCalendar(calDate.getFullYear(), calDate.getMonth()); });
+nextMonth.addEventListener('click', ()=>{ calDate = new Date(calDate.getFullYear(), calDate.getMonth()+1, 1); renderCalendar(calDate.getFullYear(), calDate.getMonth()); });
+
+// Save order on unload (defensive)
+window.addEventListener('beforeunload', ()=>{ saveOrder(); saveContent(contentState); });
+
+// initialize dashboard
+renderAll();
+
+// Expose autoSave toggle in settings UI
+document.getElementById('autoSaveToggle').addEventListener('change', (e)=>{ autoSave = e.target.checked; });
+
+// If there was previously saved order but new widgets are missing, ensure default widgets exist
+(function ensureDefaultWidgets(){
+  // if dashboard missing default widget types, append them
+  const required = ['notes','todo','bookmarks'];
+  required.forEach(id=>{
+    if(!dashboard.querySelector(`.widget[data-id="${id}"]`)){
+      // create a simple placeholder widget (rare)
+      const w = document.createElement('div'); w.className='widget'; w.dataset.id=id; w.innerHTML = `<div class="widget-header" draggable="true"><div class="widget-title">${id}</div><div class="widget-controls"><button data-action="remove-widget">✖</button></div></div><div class="widget-body"></div>`;
+      dashboard.appendChild(w);
+    }
+  });
+  // re-attach behaviors
+  attachRemoveButtons();
+  setupDragAndDrop();
+})();
+
+/* Allow saving order after user reorders manually */
+dashboard.addEventListener('drop', ()=>{ saveOrder(); });
+
+/* Ensure after dynamic changes, re-bind drag handlers */
+const observer = new MutationObserver((mut)=>{
+  // rebind drag listeners and remove buttons if widgets changed
+  setupDragAndDrop(); attachRemoveButtons();
+});
+observer.observe(dashboard, {childList:true, subtree:false});
+</script>
+</body>
+</html>

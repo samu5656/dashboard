@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My-Space</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h1>My-Space</h1>
+        <ul>
+            <li><button id="light">🌞</button></li>
+            <li><button id="settings">⚙️</button></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="widget">
+            <div class="header">
+                <h1>Sticky notes</h1>
+                <div class="widget-controls">
+                    <span class="add">+</span>
+                    <span class="delete">x</span>
+                </div>
+            </div>
+            <form>
+                <table>
+                    <tr>
+                        <td class="sticky-text"><input id="sticky-textarea" type="text" placeholder="Quick note...">
+                        </td>
+                        <td class="sticky-text"><button id="sticky-add-button">Add</button></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+        <div class="widget">
+            <div class="header">
+                <h1>Todo List</h1>
+                <div class="widget-controls">
+                    <span class="add">+</span>
+                    <span class="delete">x</span>
+                </div>
+            </div>
+            <form>
+                <table>
+                    <tr>
+                        <td class="todo-text"><input id="todo-textarea" type="text" placeholder="New task..."></td>
+                        <td class="todo-text"><button id="todo-add-button">Add</button></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div class="widget">
+            <div class="header">
+                <h1>Bookmarks</h1>
+                <div class="widget-controls">
+                    <span class="add">+</span>
+                    <span class="delete">x</span>
+                </div>
+            </div>
+            <form>
+                <table>
+                    <tr>
+                        <td class="bookmark-text"><input id="bookmark-textarea" type="text" placeholder="Add bookmark...">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="bookmark-text"><input id="bookmark-link" type="text" placeholder="Paste your link...">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="bookmark-text"><button id="bookmark-add-button">Add</button></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,158 @@
+*{
+    margin: 0%;
+    padding:0%
+}
+body {
+  font-family: "Poppins", Georgia, 'Times New Roman', Times, serif;
+  font-optical-sizing: auto;
+  font-weight: weight;
+  font-style: normal;
+  color: white;
+}
+.navbar{
+    background-color: rgb(68, 178, 217);
+    height: 60px;
+    width:100%;
+    padding:20px;
+    display: flex;
+}
+.navbar h1{
+    display: inline;
+    margin-left:15px;
+    font-size: 50px;
+}
+.navbar ul li{
+    display: inline;
+    font-size: 25px;
+    padding: 5px;
+}
+.navbar ul{
+    margin-left:70%;
+   
+}
+#light:hover, #settings:hover{
+    background-color:yellow;
+}
+#light,#settings{
+    font-size: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    border:none;
+    width:45px;
+    cursor: pointer;
+    
+}
+.container{
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap:25px;
+    
+}
+
+.widget{
+    
+    width:300px;
+    height: 200px;
+    background-color: rgb(68, 178, 217);
+    display: flex;
+    flex-direction: column;
+    border-radius: 5px;
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.3);
+} 
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color:white;
+    background-color: black;
+    padding: 5px 10px;
+    border-radius: 5px 5px 0 0;
+
+}
+.header h1{
+    font-size: 20px;
+    
+ }
+.widget-controls span {
+    margin-left: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    cursor: pointer;
+}
+.widget-controls span:hover{
+    color: yellow;
+}
+
+#sticky-textarea{
+    border-radius: 10px;
+    height: 25px;
+    width:200px;
+    padding:5px;
+    border: none;
+}
+#sticky-add-button{
+    border-radius: 5px;
+    border: none;
+    padding: 8px;
+    
+}
+#sticky-add-button:hover{
+    background-color:black;
+    color: white;
+} 
+.sticky-text{
+    padding:8px;
+}
+#todo-textarea{
+    border-radius: 10px;
+    height: 25px;
+    width:200px;
+    padding:5px;
+    border: none;
+}
+#todo-add-button{
+    border-radius: 5px;
+    border: none;
+    padding: 8px;
+    
+}
+#todo-add-button:hover{
+    background-color:black;
+    color: white;
+} 
+.todo-text{
+    padding:8px;
+}
+#bookmark-link{
+    border-radius: 10px;
+    height: 25px;
+    width:200px;
+    padding:5px;
+    border: none;
+}
+
+#bookmark-textarea{
+    border-radius: 10px;
+    height: 25px;
+    width:200px;
+    padding:5px;
+    border: none;
+}
+#bookmark-add-button{
+    border-radius: 5px;
+    border: none;
+    padding: 8px;
+    
+}
+#bookmark-add-button:hover{
+    background-color:black;
+    color: white;
+} 
+.bookmark-text{
+    padding:8px;
+}
+
+
+
