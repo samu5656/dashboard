@@ -6,24 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My-Space</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 
-<body>
+<body class="body">
     <nav class="navbar">
         <h1>My-Space</h1>
         <ul>
-            <li><button id="light">🌞</button></li>
+            <li><button id="light" onclick="toggle()">🌞</button></li>
             <li><button id="settings">⚙️</button></li>
         </ul>
     </nav>
+    <div class="settingsdiv">
+        <h2>Settings</h2>
+        <button style="margin-top: 10px;border-radius: 5px;border: none;padding: 5px;" id="cleardata">Clear all
+            data</button>
+    </div>
 
     <div class="container">
         <div class="widget">
             <div class="header">
                 <h1>Sticky notes</h1>
                 <div class="widget-controls">
-                    <span class="add">+</span>
+
                     <span class="delete">x</span>
+                </div>
+            </div>
+            <div id="sticky-widget">
+                <div id="sticky-div">
+                    <p class="sticky-para">Welcome to notes!</p>
+                    <button id="sticky-cancel">x</button>
                 </div>
             </div>
             <form>
@@ -41,10 +54,11 @@
             <div class="header">
                 <h1>Todo List</h1>
                 <div class="widget-controls">
-                    <span class="add">+</span>
-                    <span class="delete">x</span>
+
+                    <span class="delete-todo">x</span>
                 </div>
             </div>
+            <div class="todo-container"></div>
             <form>
                 <table>
                     <tr>
@@ -58,18 +72,21 @@
             <div class="header">
                 <h1>Bookmarks</h1>
                 <div class="widget-controls">
-                    <span class="add">+</span>
-                    <span class="delete">x</span>
+
+                    <span class="delete-bookmark">x</span>
                 </div>
             </div>
+            <div class="bookmarkcontainer"></div>
             <form>
                 <table>
                     <tr>
-                        <td class="bookmark-text"><input id="bookmark-textarea" type="text" placeholder="Add bookmark...">
+                        <td class="bookmark-text"><input id="bookmark-textarea" type="text"
+                                placeholder="Add bookmark...">
                         </td>
                     </tr>
                     <tr>
-                        <td class="bookmark-text"><input id="bookmark-link" type="text" placeholder="Paste your link...">
+                        <td class="bookmark-text"><input id="bookmark-link" type="text"
+                                placeholder="Paste your link...">
                         </td>
                     </tr>
                     <tr>
@@ -80,6 +97,20 @@
         </div>
 
     </div>
+    <div id="clock">
+        <h1 id="time"></h1>
+        <h1 id="date"></h1>
+        <button id="calendarBtn">🗓️</button>
+        <div id="calendarPopup">
+            <div id="calendarBox">
+                <span id="closeBtn">✖</span>
+                <h1 style="font-family: Poppins, Georgia, Times New Roman, Times, serif;"
+>Select a Date</h1>
+                <input type="date" id="calendar">
+            </div>
+        </div>
+    </div>
+
 
 </body>
 

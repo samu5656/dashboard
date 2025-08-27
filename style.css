@@ -1,158 +1,341 @@
-*{
+* {
     margin: 0%;
-    padding:0%
+    padding: 0%
 }
+
 body {
-  font-family: "Poppins", Georgia, 'Times New Roman', Times, serif;
-  font-optical-sizing: auto;
-  font-weight: weight;
-  font-style: normal;
-  color: white;
+    font-family: "Poppins", Georgia, 'Times New Roman', Times, serif;
+    font-optical-sizing: auto;
+    font-weight: weight;
+    font-style: normal;
 }
-.navbar{
+
+.navbar {
     background-color: rgb(68, 178, 217);
     height: 60px;
-    width:100%;
-    padding:20px;
+    width: 100%;
+    padding-bottom: 20px;
+    padding-top: 20px;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.navbar h1{
+
+.navbar h1 {
     display: inline;
-    margin-left:15px;
+    margin-left: 15px;
     font-size: 50px;
 }
-.navbar ul li{
+
+.navbar ul li {
     display: inline;
     font-size: 25px;
     padding: 5px;
 }
-.navbar ul{
-    margin-left:70%;
-   
+
+.navbar ul {
+    margin-left: 70%;
+
 }
-#light:hover, #settings:hover{
-    background-color:yellow;
+
+#light:hover,
+#settings:hover {
+    background-color: yellow;
 }
-#light,#settings{
+
+#cleardata:hover {
+    background-color: black;
+    color: white;
+}
+
+#light,
+#settings {
+
     font-size: 20px;
     border-radius: 10px;
     margin-top: 20px;
-    border:none;
-    width:45px;
+    border: none;
+    width: 45px;
     cursor: pointer;
-    
-}
-.container{
-    padding: 15px;
-    display: flex;
-    flex-wrap: wrap;
-    gap:25px;
-    
+
 }
 
-.widget{
-    
-    width:300px;
-    height: 200px;
+.container {
+    padding: 45px 15px 15px 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 45px;
+    justify-content: center;
+
+}
+
+.widget {
+
+    width: 300px;
+    padding-bottom: 10px;
     background-color: rgb(68, 178, 217);
     display: flex;
     flex-direction: column;
     border-radius: 5px;
     box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.3);
-} 
+}
 
-.header{
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color:white;
+    color: white;
     background-color: black;
     padding: 5px 10px;
     border-radius: 5px 5px 0 0;
 
 }
-.header h1{
+
+.header h1 {
     font-size: 20px;
-    
- }
+
+}
+
 .widget-controls span {
     margin-left: 5px;
     cursor: pointer;
     font-weight: bold;
     cursor: pointer;
 }
-.widget-controls span:hover{
+
+.widget-controls span:hover {
     color: yellow;
 }
 
-#sticky-textarea{
+#sticky-textarea {
     border-radius: 10px;
     height: 25px;
-    width:200px;
-    padding:5px;
+    width: 200px;
+    padding: 5px;
     border: none;
 }
-#sticky-add-button{
+
+#sticky-add-button {
     border-radius: 5px;
     border: none;
     padding: 8px;
-    
+
 }
-#sticky-add-button:hover{
-    background-color:black;
+
+#sticky-add-button:hover {
+    background-color: black;
     color: white;
-} 
-.sticky-text{
-    padding:8px;
 }
-#todo-textarea{
+
+.sticky-text {
+    padding: 8px;
+}
+
+#todo-textarea {
     border-radius: 10px;
     height: 25px;
-    width:200px;
-    padding:5px;
+    width: 200px;
+    padding: 5px;
     border: none;
 }
-#todo-add-button{
+
+#todo-add-button {
     border-radius: 5px;
     border: none;
     padding: 8px;
-    
+
 }
-#todo-add-button:hover{
-    background-color:black;
+
+#todo-add-button:hover {
+    background-color: black;
     color: white;
-} 
-.todo-text{
-    padding:8px;
 }
-#bookmark-link{
+
+.todo-text {
+    padding: 8px;
+}
+
+#bookmark-link {
     border-radius: 10px;
     height: 25px;
-    width:200px;
-    padding:5px;
+    width: 200px;
+    padding: 5px;
     border: none;
 }
 
-#bookmark-textarea{
+#bookmark-textarea {
     border-radius: 10px;
     height: 25px;
-    width:200px;
-    padding:5px;
+    width: 200px;
+    padding: 5px;
     border: none;
 }
-#bookmark-add-button{
+
+#bookmark-add-button {
     border-radius: 5px;
     border: none;
     padding: 8px;
-    
+
 }
-#bookmark-add-button:hover{
-    background-color:black;
+
+#bookmark-add-button:hover {
+    background-color: black;
     color: white;
-} 
-.bookmark-text{
-    padding:8px;
 }
 
+.bookmark-text {
+    padding: 8px;
+}
 
+#clock {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: 8px;
+    color: black;
+    background-color: rgb(68, 178, 217);
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+    height: 100px;
+    width: 130px;
+    border-radius: 5px;
+    text-align: center;
+    padding: 10px;
+    display: inline-block;
+    flex-direction: column;
+    justify-content: center;
+}
 
+#date {
+    font-size: 15px;
+    margin-top: 13px;
+    color: white;
+    position: relative;
+}
+
+#calendarBtn {
+    font-size: 25px;
+    position: relative;
+    border-radius: 5px;
+    margin-top: 5px;
+    border: none;
+    background-color: rgb(68, 178, 217);
+
+}
+
+#sticky-div {
+    padding: 5px;
+    background-color: white;
+    margin: 5px;
+    position: relative;
+    border-radius: 3px;
+
+}
+
+.sticky-div {
+    padding: 5px;
+    background-color: white;
+    margin: 5px;
+    position: relative;
+    border-radius: 3px;
+
+}
+
+.sticky-para {
+    display: inline;
+    color: black;
+}
+
+#sticky-cancel {
+    display: inline;
+    position: relative;
+    margin-left: 136px;
+    border: none;
+    background-color: white;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.tododiv {
+    padding: 5px;
+    background-color: white;
+    margin: 8px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.bookmarkdiv {
+    padding: 5px;
+    background-color: white;
+    margin: 8px;
+    position: relative;
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.settingsdiv {
+    width: 200px;
+    background-color: rgb(68, 178, 217);
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    right: 20px;
+    top: 105px;
+    display: none;
+    z-index: 1000;
+
+}
+
+body {
+    overflow-x: hidden;
+
+}
+
+#calendarPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#calendarBox {
+    background-color: rgb(68, 178, 217);
+    ;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.708);
+    position: relative;
+    width: 250px;
+    text-align: center;
+}
+
+#closeBtn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    color: black;
+}
+
+#calendar {
+    border-radius: 5px;
+    border: none;
+    padding: 5px;
+    margin-top: 15px;
+}
+
+#calendarBtn:hover {
+    background-color: #0b7dda;
+}
