@@ -24,19 +24,28 @@ body {
 .navbar h1 {
     display: inline;
     margin-left: 15px;
-    font-size: 50px;
+    font-size: 40px;
 }
 
-.navbar ul li {
-    display: inline;
-    font-size: 25px;
-    padding: 5px;
+.quotes{
+    text-align: center;
+    background-color:rgb(68, 178, 217);
+    margin-top: 15px;
+    margin-left: 15px;
+    margin-right: 15px;
+    padding: 15px;
+    border-radius: 25px;
+}
+.list {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+    list-style: none;
 }
 
-.navbar ul {
-    margin-left: 70%;
-
-}
 
 #light:hover,
 #settings:hover {
@@ -44,8 +53,8 @@ body {
 }
 
 #cleardata:hover {
-    background-color: black;
-    color: white;
+    background-color:rgb(68, 178, 217);
+    color: black;
 }
 
 #light,
@@ -266,6 +275,7 @@ body {
     align-items: center;
     border: 1px solid #ccc;
     border-radius: 5px;
+    color: black;
 }
 
 .bookmarkdiv {
@@ -280,7 +290,8 @@ body {
 
 .settingsdiv {
     width: 200px;
-    background-color: rgb(68, 178, 217);
+    background-color: black;
+    color: white;
     padding: 15px;
     border-radius: 5px;
     box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
@@ -297,45 +308,130 @@ body {
 
 }
 
-#calendarPopup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
+.calendar-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
 }
 
-#calendarBox {
-    background-color: rgb(68, 178, 217);
-    ;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.708);
-    position: relative;
-    width: 250px;
-    text-align: center;
+
+.calendar-content {
+  background: white;
+  padding: 20px;
+  border-radius: 25px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  font-family: "Poppins", sans-serif;
 }
 
-#closeBtn {
-    position: absolute;
-    top: 5px;
-    right: 10px;
-    cursor: pointer;
-    font-size: 18px;
-    color: black;
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-#calendar {
-    border-radius: 5px;
-    border: none;
-    padding: 5px;
-    margin-top: 15px;
+.calendar-header button {
+  background: #f0f0f0;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
 }
+
+.calendar-header button:hover {
+  background: #ddd;
+}
+
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+}
+
+
+.calendar-grid div {
+  padding: 8px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+
+.calendar-grid div:nth-child(-n+7) {
+  font-weight: bold;
+  background: #f0f0f0;
+}
+
+.today {
+  background: #5aa9ff;
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
 
 #calendarBtn:hover {
     background-color: #0b7dda;
+}
+
+
+
+@media screen and (max-width: 480px) {
+    .navbar h1 {
+        display: inline;
+        margin-left: 15px;
+        font-size: 30px;
+    }
+
+    .navbar ul li {
+
+        font-size: 15px;
+        padding: 5px;
+    }
+
+    #light,
+    #settings {
+
+        font-size: 15px;
+
+    }
+
+}
+
+@media screen and (max-width:650px) {
+    #clock {
+        height: 80px;
+        width: 80px;
+        background-color: black;
+
+    }
+
+    #date {
+        font-size: 10px;
+    }
+
+    #time {
+        font-size: 10px;
+        color: white;
+    }
+
+    #calendarBtn {
+        font-size: 20px;
+        background-color: black;
+    }
+}
+.sticky-text:focus {
+    outline: none;  
 }

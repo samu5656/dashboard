@@ -8,6 +8,19 @@ const widgetcontrols = document.querySelector(".widget-controls");
 const addbtn = document.querySelector(".add");
 const deletebtn = document.querySelector(".delete");
 const body = document.body;
+const quoteText=document.getElementById("quote");
+
+fetch("https://raw.githubusercontent.com/JamesFT/Database-Quotes-JSON/master/quotes.json")
+  .then(res => res.json())
+  .then(data => {
+    const random = data[Math.floor(Math.random() * data.length)];
+    quoteText.textContent = `"${random.quoteText}" — ${random.quoteAuthor || "Unknown"}`;
+  })
+  .catch(err => {
+    console.error("Error fetching quote:", err);
+    quoteText.textContent = "Could not load quote!";
+  });
+
 let isDark = false;
 function toggle() {
     if (!isDark) {
@@ -84,28 +97,45 @@ function createsticky(stickies) {
     var div = document.createElement("div");
     div.setAttribute("class", "sticky-div");
     div.style.position = "relative";
-    div.innerHTML = `<p style="display: inline;">${stickies}</p><button style="display: inline;
+    div.innerHTML = `<p style="display: inline; margin: 0;
+    padding: 0;" class="sticky-text" contenteditable="true">${stickies}</p><button style="display: inline;
         position:absolute;
         right: 5px;
         top: 50%;
-        transform: translateY(-50%);
+        transform:translateY(-50%);
         border: none;
         background-color: white;
         font-size: 15px;
         font-weight: bold;" class="sticky-cancel-btn">x</button>`
-    stickywidget.prepend(div);
+    stickywidget.append(div);
 
-    var stickycancelbtn = document.querySelector(".sticky-cancel-btn");
+    var stickycancelbtn = div.querySelector(".sticky-cancel-btn");
     stickycancelbtn.addEventListener("click", function (event) {
         div.remove();
+        saveAllStickies();
 
-        let savedstickies = JSON.parse(localStorage.getItem("stickies")) || [];
-        savedstickies = savedstickies.filter(s => s !== stickies);
-        localStorage.setItem("stickies", JSON.stringify(savedstickies));
+    });
 
-    })
+    var stickytexts = div.querySelector(".sticky-text");
+    stickytexts.addEventListener("input",function() {
 
+        saveAllStickies();
+
+    });
 }
+
+function saveAllStickies(){
+    let allText =[];
+    document.querySelectorAll(".sticky-text").forEach(s=>{
+        let txt=s.innerText.trim();
+        if(txt!==""&& txt.toLowerCase()!=="add"){
+            allText.push(txt);
+        }
+    });
+
+    localStorage.setItem("stickies",JSON.stringify(allText));
+}
+
 let deletebutton = document.querySelector(".delete");
 deletebtn.addEventListener("click", function () {
     document.querySelectorAll(".sticky-div").forEach(sticky => sticky.remove());
@@ -115,13 +145,11 @@ deletebtn.addEventListener("click", function () {
 stickyadd.addEventListener("click", function (event) {
     event.preventDefault();
     let stickies = stickytext.value;
-    if (stickytext.value.trim() === "") return;
+    if (stickies === "") return;
 
     createsticky(stickies);
+    saveAllStickies();
 
-    let savedstickies = JSON.parse(localStorage.getItem("stickies")) || [];
-    savedstickies.push(stickies);
-    localStorage.setItem("stickies", JSON.stringify(savedstickies));
 
     stickytext.value = "";
 
@@ -130,18 +158,18 @@ stickyadd.addEventListener("click", function (event) {
 window.addEventListener("load", function () {
     let savedstickies = JSON.parse(this.localStorage.getItem("stickies")) || [];
     savedstickies.forEach(sticky => createsticky(sticky));
-})
+});
 
 var todotextarea = document.getElementById("todo-textarea");
 var todoaddbtn = document.getElementById("todo-add-button");
 var todocontainer = document.querySelector(".todo-container");
 
 
-function createTodo(task) {
+function createTodo(taskObj) {
     var tododiv = document.createElement("div");
     tododiv.setAttribute("class", "tododiv");
     tododiv.style.position = "relative";
-    tododiv.innerHTML = `<input type="checkbox" style="display: inline">   ${task}<button style="display: inline;
+    tododiv.innerHTML = `<input type="checkbox" class="todo-checkbox" style="display: inline">   ${taskObj.text}<button style="display: inline;
         position:absolute;
         right: 5px;
         top: 50%;
@@ -154,12 +182,26 @@ function createTodo(task) {
     tododiv.style.display = "block";
     todocontainer.prepend(tododiv);
 
-    var todocancel = document.querySelector(".todo-cancel-btn")
+    var checkbox = tododiv.querySelector(".todo-checkbox");
+    checkbox.checked=taskObj.completed;
+
+    checkbox.addEventListener("change",function(){
+        let todos = JSON.parse(localStorage.getItem("tasks")) ||[];
+        todos=todos.map(t=>{
+            if (t.text === taskObj.text){
+                return {...t, completed: checkbox.checked};
+            }
+            return t;
+        });
+        localStorage.setItem("tasks",JSON.stringify(todos));
+    })
+
+    var todocancel = tododiv.querySelector(".todo-cancel-btn")
     todocancel.addEventListener("click", function (event) {
         tododiv.remove();
 
         let updatedTodos = JSON.parse(localStorage.getItem("tasks")) || [];
-        updatedTodos = updatedTodos.filter(t => t !== task);
+        updatedTodos = updatedTodos.filter(t => t.text !== taskObj.text);
         localStorage.setItem("tasks", JSON.stringify(updatedTodos));
     });
 
@@ -175,10 +217,12 @@ todoaddbtn.addEventListener("click", function (event) {
     event.preventDefault();
     let task = todotextarea.value;
     if (todotextarea.value.trim() === "") return;
-    createTodo(task);
+
+    let taskObj={text: task , completed: false};
+    createTodo(taskObj);
 
     let savedtodos = JSON.parse(localStorage.getItem("tasks")) || [];
-    savedtodos.push(task);
+    savedtodos.push(taskObj);
     localStorage.setItem("tasks", JSON.stringify(savedtodos));
 
     todotextarea.value = "";
@@ -187,7 +231,7 @@ todoaddbtn.addEventListener("click", function (event) {
 
 window.addEventListener("load", function () {
     let savedtodos = JSON.parse(this.localStorage.getItem("tasks")) || [];
-    savedtodos.forEach(task => createTodo(task));
+    savedtodos.forEach(taskObj => createTodo(taskObj));
 })
 
 
@@ -229,7 +273,8 @@ function createbookmark(bookmark, link) {
 let deletebutton_bookmark = document.querySelector(".delete-bookmark");
 deletebutton_bookmark.addEventListener("click", function () {
     document.querySelectorAll(".bookmarkdiv").forEach(bookmark => bookmark.remove());
-    localStorage.removeItem("bookmark");
+    localStorage.removeItem("bookmarks");
+    localStorage.removeItem("links");
 });
 
 
@@ -242,6 +287,7 @@ bookmarkbtn.addEventListener("click", function (event) {
     if (bookmarktext.value.trim() === "") return;
     if (bookmarklink.value.trim() === "") {
         alert("Add url!");
+        return;
     }
 
     createbookmark(bookmark, link);
@@ -288,22 +334,87 @@ cleardata.addEventListener("click", function () {
         location.reload();
     }
 })
-const calendarButn = document.getElementById("calendarBtn");
-const calendarPopup = document.getElementById("calendarPopup");
-const closeBtn = document.getElementById("closeBtn");
-
-calendarButn.addEventListener("click", () => {
-    calendarPopup.style.display = "flex"; 
-});
-
-closeBtn.addEventListener("click", () => {
-    calendarPopup.style.display = "none"; 
-});
-
-
 window.addEventListener("click", (event) => {
-    if (event.target === calendarPopup) {
-        calendarPopup.style.display = "none";
+    if (settingdiv.style.display === "block" && !settingdiv.contains(event.target) && event.target !== setting) {
+        settingdiv.style.display = "none";
     }
 });
+
+
+const calendarBtn = document.getElementById("calendarBtn");
+const calendarPopup = document.getElementById("calendarPopup");
+const closeBtn = document.getElementById("closeBtn");
+const monthYear = document.getElementById("monthYear");
+const calendarGrid = document.getElementById("calendarGrid");
+const prevMonthBtn = document.getElementById("prevMonth");
+const nextMonthBtn = document.getElementById("nextMonth");
+
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
+function generateCalendar(month, year) {
+    const months = [
+        "January","February","March","April","May","June",
+        "July","August","September","October","November","December"
+    ];
+
+    monthYear.textContent = `${months[month]} ${year}`;
+    calendarGrid.innerHTML = "";
+
+    const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    weekdays.forEach(day => {
+        let div = document.createElement("div");
+        div.textContent = day;
+        div.style.fontWeight = "bold";
+        div.style.background = "#f0f0f0";
+        calendarGrid.appendChild(div);
+    });
+
+    let firstDay = new Date(year, month, 1).getDay();
+    let daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let i = 0; i < firstDay; i++) {
+        calendarGrid.innerHTML += `<div></div>`;
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        let today = new Date();
+        let isToday =
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear();
+
+        calendarGrid.innerHTML += `<div class="${isToday ? "today" : ""}">${day}</div>`;
+    }
+}
+
+
+calendarBtn.addEventListener("click", () => {
+    calendarPopup.style.display = "flex";
+});
+
+
+closeBtn.addEventListener("click", () => {
+    calendarPopup.style.display = "none";
+});
+
+
+prevMonthBtn.addEventListener("click", () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    }
+    generateCalendar(currentMonth, currentYear);
+});
+
+nextMonthBtn.addEventListener("click", () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    generateCalendar(currentMonth, currentYear);
+});
+
+generateCalendar(currentMonth, currentYear);
 
